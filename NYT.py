@@ -67,7 +67,8 @@ class NYArticle:
         self.APIKEY = apikey 
 
     def setQuery(self,query):
-        self.QUERY = query 
+        self.QUERY = query
+        self.QUERY = query.replace(" ","%20")
         
     def linkGen(self):
         link = self.APIENDPOINT + self.QUERYPARAM + self.QUERY + self.APIKEYPARAM + self.APIKEY
@@ -162,7 +163,7 @@ class NYArticle:
                 
 def main():
     test = NYArticle("5caa290b6f044865a614b3a22d653997%3A0%3A72414519")
-    test.setQuery("obama")
+    test.setQuery("syria refugees in america")
     test.articleProcessingPipeline()
     for art in test.articleList:
         print art.snippet

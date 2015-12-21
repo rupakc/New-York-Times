@@ -64,7 +64,15 @@ class Person:
     lastname = ""
 '''
 '''
-
+class Multimedia:
+    
+    width = ""
+    height = ""
+    url = ""
+    subtype = ""
+    
+'''
+'''
 class NYArticle: 
     
     APIKEY = "5caa290b6f044865a614b3a22d653997%3A0%3A72414519"
@@ -76,6 +84,12 @@ class NYArticle:
     keywordList = []
     headlineList = []
     bylineList = []
+    multimediaList = []
+    PAGEPARAM = "&page="
+    PAGE = 2;
+    ISPAGINATION = False;
+    BEGINDATEPARAM = "&begin_date="
+    ENDDATEPARAM = "&end_date="
     
     def __init__(self,apikey): 
         self.APIKEY = apikey 
@@ -87,9 +101,29 @@ class NYArticle:
     def linkGen(self):
         link = self.APIENDPOINT + self.QUERYPARAM + self.QUERY + self.APIKEYPARAM + self.APIKEY
         return link  
+    
+    def populateMultiMedia(self,multimediaArray): 
         
-    def populateByLine(self,byline):
-        bye = Byline() 
+        mediaList = []
+        
+        for multimedia in multimediaArray:
+            media = Multimedia()
+            if "width" in multimedia: 
+                media.width = multimedia["width"]
+            if "height" in multimedia:
+                media.height = multimedia["height"]
+            if "url" in multimedia:
+                media.url = multimedia["url"]
+            if "subtype" in multimedia:
+                media.subtype = multimedia["subtype"]
+            mediaList.append(media)
+        
+        return mediaList
+        
+    def populateByLine(self,byline): 
+        
+        bye = Byline()  
+        
         if "original" in byline:
             bye.original = byline["original"] 
             
@@ -162,8 +196,11 @@ class NYArticle:
         
         if "docs" in jsonData["response"]:
             
-            documentList = jsonData["response"]["docs"] 
+            documentList = jsonData["response"]["docs"]  
             
+            if len(documentList) == 0:
+                return
+                
             for document in documentList: 
                 
                 article = Article()
@@ -182,13 +219,17 @@ class NYArticle:
                 article.word_count = document["word_count"]
                 article.slideshow_credits = document["slideshow_credits"]
                 
-                if "byline" in document:
-                    self.bylineList.append(self.populateByLine(document["byline"]))
-                if "keywords" in document:
+                if "byline" in document and document["byline"] != None:
+                    self.bylineList.append(self.populateByLine(document["byline"])) 
+                    
+                if "keywords" in document and document["keywords"] != None:
                     self.keywordList.append(self.populateKeywordList(document["keywords"]))
                 
-                if "headline" in document:
+                if "headline" in document and document["headline"] != None:
                     self.headlineList.append(self.populateHeadline(document["headline"]))
+                
+                if "multimedia" in document and document["multimedia"] != None:
+                    self.multimediaList.append(self.populateMultiMedia(document["multimedia"]))
                 
                 self.articleList.append(article)   
                 
@@ -203,10 +244,11 @@ class NYArticle:
 def main():
     test = NYArticle("5caa290b6f044865a614b3a22d653997%3A0%3A72414519")
     print test.linkGen()
-    test.setQuery("sundar pichai")
+    test.setQuery("obama")
     test.articleProcessingPipeline()
-    for art in test.bylineList:
-        print art.original
+    for art in test.multimediaList:
+        for k in art:
+            print k.subtype
         
     
 if __name__ == "__main__":

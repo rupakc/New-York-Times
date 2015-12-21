@@ -3,7 +3,6 @@
 Created on Sun Dec 20 13:26:54 2015
 Wrapper around the New York Times Article Search API
 @author: Rupak Chakraborty
-TODO - Add pagination
 """
 
 import urllib2
@@ -112,6 +111,8 @@ class NYArticle:
         
     def setEndDate(self,end_date):
         self.ENDDATE = end_date.strip()
+    def setPagination(self,boolPaginate):
+        self.ISPAGINATION = boolPaginate;
         
     def linkGen(self):
         
@@ -122,16 +123,18 @@ class NYArticle:
         if self.ENDDATE != "-1":
             link = link + self.ENDDATEPARAM + self.ENDDATE
         if self.ISPAGINATION:
-            link = link + self.PAGEPARAM + self.PAGE
+            link = link + self.PAGEPARAM + str(self.PAGE)
             
         return link  
     
     def populateMultiMedia(self,multimediaArray): 
         
         mediaList = []
-        
-        for multimedia in multimediaArray:
-            media = Multimedia()
+    
+        for multimedia in multimediaArray: 
+            
+            media = Multimedia() 
+            
             if "width" in multimedia: 
                 media.width = multimedia["width"]
             if "height" in multimedia:
@@ -140,6 +143,7 @@ class NYArticle:
                 media.url = multimedia["url"]
             if "subtype" in multimedia:
                 media.subtype = multimedia["subtype"]
+                
             mediaList.append(media)
         
         return mediaList
@@ -150,22 +154,23 @@ class NYArticle:
         
         if "original" in byline:
             bye.original = byline["original"] 
-            
-        for per in byline["person"]: 
-            
-            subject = Person() 
-            
-            if "organization" in per:
-                subject.organization = per["organization"]
-            if "role" in per:
-                subject.role = per["role"]
-            if "firstname" in per:
-                subject.firstname = per["firstname"]
-            if "rank" in per:
-                subject.rank = per["rank"]
-            if "lastname" in per:
-                subject.lastname = per["lastname"]
-            bye.personList.append(subject)
+        
+        if "person" in byline:
+            for per in byline["person"]: 
+                
+                subject = Person() 
+                
+                if "organization" in per:
+                    subject.organization = per["organization"]
+                if "role" in per:
+                    subject.role = per["role"]
+                if "firstname" in per:
+                    subject.firstname = per["firstname"]
+                if "rank" in per:
+                    subject.rank = per["rank"]
+                if "lastname" in per:
+                    subject.lastname = per["lastname"]
+                bye.personList.append(subject)
             
         return bye
         
@@ -259,22 +264,38 @@ class NYArticle:
                 
     def articleProcessingPipeline(self): 
         
-        link = self.linkGen()
-        jsonResponse = self.getJSONResponse(link)
-        
-        if (jsonResponse != "failure"):
-            self.populateJSONFields(jsonResponse)
+        if self.ISPAGINATION:
+            while self.PAGE <= 100:
+                link = self.linkGen()
+                print self.PAGE
+                jsonResponse = self.getJSONResponse(link)
+                self.PAGE = self.PAGE + 1
+                if (jsonResponse != "failure"):
+                    if "docs" in jsonResponse["response"]:
+                        documentList = jsonResponse["response"]["docs"]
+                        if len(documentList) > 0:
+                            self.populateJSONFields(jsonResponse)
+                        else:
+                            break
+        else:
+            link = self.linkGen()
+            jsonResponse = self.getJSONResponse(link)
+            if (jsonResponse != "failure"):
+                self.populateJSONFields(jsonResponse)
                 
 def main():
     test = NYArticle("5caa290b6f044865a614b3a22d653997%3A0%3A72414519")
-    test.setQuery("obama")
+    test.setQuery("india")
     test.setBeginDate("20110101")
-    test.setEndDate("20120101")
+    test.setEndDate("20110601")
+    test.setPagination(True)
     print test.linkGen()
+   
     test.articleProcessingPipeline()
     for art in test.articleList:
         print art.snippet
-        
+   
+    
     
 if __name__ == "__main__":
     main()

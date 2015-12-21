@@ -3,7 +3,7 @@
 Created on Sun Dec 20 13:26:54 2015
 Wrapper around the New York Times Article Search API
 @author: Rupak Chakraborty
-TODO - Add multimedia support byline support and pagination and time interval of query
+TODO - Add multimedia support and pagination and time interval of query
 """
 
 import urllib2
@@ -49,6 +49,19 @@ class Headline:
     kicker = ""
     print_headline = ""
     content_kicker = ""
+
+class Byline:
+    
+    original = ""
+    personList = []
+
+class Person:
+    
+    organization = ""
+    role = ""
+    rank = ""
+    firstname = ""
+    lastname = ""
 '''
 '''
 
@@ -61,7 +74,8 @@ class NYArticle:
     APIENDPOINT = "http://api.nytimes.com/svc/search/v2/articlesearch.json?"
     articleList = []
     keywordList = []
-    headlineList = [] 
+    headlineList = []
+    bylineList = []
     
     def __init__(self,apikey): 
         self.APIKEY = apikey 
@@ -72,7 +86,30 @@ class NYArticle:
         
     def linkGen(self):
         link = self.APIENDPOINT + self.QUERYPARAM + self.QUERY + self.APIKEYPARAM + self.APIKEY
-        return link 
+        return link  
+        
+    def populateByLine(self,byline):
+        bye = Byline() 
+        if "original" in byline:
+            bye.original = byline["original"] 
+            
+        for per in byline["person"]: 
+            
+            subject = Person() 
+            
+            if "organization" in per:
+                subject.organization = per["organization"]
+            if "role" in per:
+                subject.role = per["role"]
+            if "firstname" in per:
+                subject.firstname = per["firstname"]
+            if "rank" in per:
+                subject.rank = per["rank"]
+            if "lastname" in per:
+                subject.lastname = per["lastname"]
+            bye.personList.append(subject)
+            
+        return bye
         
     def getJSONResponse(self,link):
         jsonResponse = ""
@@ -145,6 +182,8 @@ class NYArticle:
                 article.word_count = document["word_count"]
                 article.slideshow_credits = document["slideshow_credits"]
                 
+                if "byline" in document:
+                    self.bylineList.append(self.populateByLine(document["byline"]))
                 if "keywords" in document:
                     self.keywordList.append(self.populateKeywordList(document["keywords"]))
                 
@@ -163,10 +202,12 @@ class NYArticle:
                 
 def main():
     test = NYArticle("5caa290b6f044865a614b3a22d653997%3A0%3A72414519")
-    test.setQuery("syria refugees in america")
+    print test.linkGen()
+    test.setQuery("sundar pichai")
     test.articleProcessingPipeline()
-    for art in test.articleList:
-        print art.snippet
+    for art in test.bylineList:
+        print art.original
+        
     
 if __name__ == "__main__":
     main()

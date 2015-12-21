@@ -101,19 +101,30 @@ class NYArticle:
     
     def __init__(self,apikey): 
         self.APIKEY = apikey 
-
+        
+    """
+    Sets the query for a given article search
+    """
     def setQuery(self,query):
         self.QUERY = query
         self.QUERY = query.replace(" ","%20") 
         
     def setBeginDate(self,begin_date):
         self.BEGINDATE = begin_date.strip() 
-        
+    """ 
+    Sets the ending date for the article search query
+    """ 
     def setEndDate(self,end_date):
-        self.ENDDATE = end_date.strip()
+        self.ENDDATE = end_date.strip() 
+        
+    """
+    Sets the pagination flag for the given query
+    """
     def setPagination(self,boolPaginate):
         self.ISPAGINATION = boolPaginate;
-        
+    """ 
+    Generates the url for the API endpoint to retrieve the articles from
+    """   
     def linkGen(self):
         
         link = self.APIENDPOINT + self.QUERYPARAM + self.QUERY + self.APIKEYPARAM + self.APIKEY
@@ -126,7 +137,9 @@ class NYArticle:
             link = link + self.PAGEPARAM + str(self.PAGE)
             
         return link  
-    
+    """
+    Populates the multimedia data for the article search
+    """
     def populateMultiMedia(self,multimediaArray): 
         
         mediaList = []
@@ -283,19 +296,3 @@ class NYArticle:
             if (jsonResponse != "failure"):
                 self.populateJSONFields(jsonResponse)
                 
-def main():
-    test = NYArticle("5caa290b6f044865a614b3a22d653997%3A0%3A72414519")
-    test.setQuery("india")
-    test.setBeginDate("20110101")
-    test.setEndDate("20110601")
-    test.setPagination(True)
-    print test.linkGen()
-   
-    test.articleProcessingPipeline()
-    for art in test.articleList:
-        print art.snippet
-   
-    
-    
-if __name__ == "__main__":
-    main()

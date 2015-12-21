@@ -33,7 +33,6 @@ class Article:
 
 '''
 '''
-
 class Keyword:
     
     rank = ""
@@ -42,19 +41,20 @@ class Keyword:
     name = ""
 '''
 '''
-  
 class Headline:
     
     main = ""
     kicker = ""
     print_headline = ""
     content_kicker = ""
-
+'''
+'''
 class Byline:
     
     original = ""
     personList = []
-
+'''
+'''
 class Person:
     
     organization = ""

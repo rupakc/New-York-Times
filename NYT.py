@@ -3,7 +3,7 @@
 Created on Sun Dec 20 13:26:54 2015
 Wrapper around the New York Times Article Search API
 @author: Rupak Chakraborty
-TODO - Add multimedia support and pagination and time interval of query
+TODO - Add pagination
 """
 
 import urllib2
@@ -32,6 +32,7 @@ class Article:
     news_desk = ""
 
 '''
+Defines a keyword class for containing all the given keywords of a given article
 '''
 class Keyword:
     
@@ -40,6 +41,7 @@ class Keyword:
     value = ""
     name = ""
 '''
+Defines the headline of a given article
 '''
 class Headline:
     
@@ -48,12 +50,15 @@ class Headline:
     print_headline = ""
     content_kicker = ""
 '''
+Defines the class for bylines i.e. list of reporters for the given article
 '''
 class Byline:
     
     original = ""
     personList = []
+    
 '''
+Defines a person i.e. Reporter information of the article
 '''
 class Person:
     
@@ -63,6 +68,7 @@ class Person:
     firstname = ""
     lastname = ""
 '''
+Defines the multimedia associated with an article mostly images in different formats
 '''
 class Multimedia:
     
@@ -72,6 +78,7 @@ class Multimedia:
     subtype = ""
     
 '''
+Main class to fetch the article information from New York Times API
 '''
 class NYArticle: 
     
@@ -86,20 +93,37 @@ class NYArticle:
     bylineList = []
     multimediaList = []
     PAGEPARAM = "&page="
-    PAGE = 2;
+    PAGE = 1;
     ISPAGINATION = False;
     BEGINDATEPARAM = "&begin_date="
     ENDDATEPARAM = "&end_date="
+    BEGINDATE="-1"
+    ENDDATE="-1"
     
     def __init__(self,apikey): 
         self.APIKEY = apikey 
 
     def setQuery(self,query):
         self.QUERY = query
-        self.QUERY = query.replace(" ","%20")
+        self.QUERY = query.replace(" ","%20") 
+        
+    def setBeginDate(self,begin_date):
+        self.BEGINDATE = begin_date.strip() 
+        
+    def setEndDate(self,end_date):
+        self.ENDDATE = end_date.strip()
         
     def linkGen(self):
+        
         link = self.APIENDPOINT + self.QUERYPARAM + self.QUERY + self.APIKEYPARAM + self.APIKEY
+        
+        if self.BEGINDATE != "-1":
+            link = link + self.BEGINDATEPARAM + self.BEGINDATE
+        if self.ENDDATE != "-1":
+            link = link + self.ENDDATEPARAM + self.ENDDATE
+        if self.ISPAGINATION:
+            link = link + self.PAGEPARAM + self.PAGE
+            
         return link  
     
     def populateMultiMedia(self,multimediaArray): 
@@ -243,12 +267,13 @@ class NYArticle:
                 
 def main():
     test = NYArticle("5caa290b6f044865a614b3a22d653997%3A0%3A72414519")
-    print test.linkGen()
     test.setQuery("obama")
+    test.setBeginDate("20110101")
+    test.setEndDate("20120101")
+    print test.linkGen()
     test.articleProcessingPipeline()
-    for art in test.multimediaList:
-        for k in art:
-            print k.subtype
+    for art in test.articleList:
+        print art.snippet
         
     
 if __name__ == "__main__":

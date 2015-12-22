@@ -161,6 +161,8 @@ class NYArticle:
         
         return mediaList
         
+    # Popluates the byline i.e. author names 
+        
     def populateByLine(self,byline): 
         
         bye = Byline()  
@@ -185,7 +187,9 @@ class NYArticle:
                     subject.lastname = per["lastname"]
                 bye.personList.append(subject)
             
-        return bye
+        return bye 
+        
+    # Given a link generated the json response
         
     def getJSONResponse(self,link):
         jsonResponse = ""
@@ -198,7 +202,9 @@ class NYArticle:
         data = response.read()
         jsonResponse = json.loads(data) 
         
-        return jsonResponse
+        return jsonResponse 
+        
+     # Populates the headlines for a given json response   
         
     def populateHeadline(self,headline):
         
@@ -212,8 +218,10 @@ class NYArticle:
         if "print_headline" in headline:
             head.print_headline = headline["print_headline"] 
             
-        return head;
-            
+        return head; 
+        
+     # Populates the keywords list for a given article 
+        
     def populateKeywordList(self,keywords):
         
         keywordArray = []
@@ -232,7 +240,9 @@ class NYArticle:
                 
             keywordArray.append(key)
             
-        return keywordArray
+        return keywordArray 
+        
+    #Popluates the  json fields from the generated response
         
     def populateJSONFields(self,jsonData):
         
@@ -273,7 +283,9 @@ class NYArticle:
                 if "multimedia" in document and document["multimedia"] != None:
                     self.multimediaList.append(self.populateMultiMedia(document["multimedia"]))
                 
-                self.articleList.append(article)   
+                self.articleList.append(article)    
+                
+    # Defines the pipeline for processing of the article     
                 
     def articleProcessingPipeline(self): 
         
